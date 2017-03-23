@@ -4,6 +4,7 @@
 # Author: Eric Stansifer
 # Date: 2017 March 19
 # License: MIT License
+# Hosted on https://github.com/estansifer/percolation
 # Tested on Python 3.5.2. Requires numpy. Seems to also work on Python 2.7.
 
 import numpy as np
