@@ -10,6 +10,30 @@ import numpy as np
 import numpy.random as npr
 import sys
 
+#
+# Useful functions in this module:
+#
+# biggest_clusters(d, Ls, ps, numclusters)
+#   d: integer (>= 1), the dimension
+#   Ls: integer or list of integers (>= 2), the grid size
+#   ps: float or list of floats (>= 0, <= 1), the occupancy probability
+#   numclusters: integer, how many of the biggest clusters to return
+#   numclusters is optional and 10 by default
+#   At most one of Ls or ps can have more than one number
+#   returns a list of triples (L, p, [size]) where [size] is a list
+#   in decreasing order of cluster sizes for the indicates L and p.
+#   (The results will be returned in order of increasing L or p.)
+#
+# percolation2d(keyword, L, p)
+#   keyword: either "one", "masses", "biggest", or "whichcluster"
+#   L: integer (>= 2), the grid size
+#   p: float (>= 0, <= 1), the occupancy probability
+#   returns LxL grid of integers. Meaning of the grid depends on choice
+#   of the keyword. See usage for more information.
+#
+
+suppress_warning = False
+
 usage=(
 """A program for finding sizes of clusters in a percolation process.
 Usage:
@@ -111,7 +135,7 @@ def prettyprint(data):
 #
 def biggest_clusters_ps(d, L, ps, numclusters = 10, interrupt = False):
     V = L ** d
-    if d * V * max(ps) > 1e7:
+    if (d * V * max(ps) > 1e7) and not suppress_warning:
         sys.stderror.write("A very large number {} of cells was chosen in the domain, this may take a long time.".format(V))
 
     Vd = V * d
@@ -179,7 +203,7 @@ def biggest_clusters_ps(d, L, ps, numclusters = 10, interrupt = False):
         # Find the most massive clusters
         masses = list(mass[np.arange(Vd, dtype = int) == uf])
         masses.sort(reverse = True)
-        results.append((L, ps[k], masses[:numclusters]))
+        results.append([L, ps[k], masses[:numclusters]])
 
     return results
 
@@ -192,7 +216,7 @@ def biggest_clusters_Ls(d, Ls, p, numclusters = 10):
 
     V = Lmax ** d
     Vd = V * d
-    if d * V * p > 1e7:
+    if (d * V * p > 1e7) and not suppress_warning:
         sys.stderror.write("A very large number {} of cells was chosen in the domain, this may take a long time.".format(V))
 
     cells = np.zeros((V, 2 * d), dtype = int)
@@ -287,11 +311,11 @@ def biggest_clusters_Ls(d, Ls, p, numclusters = 10):
         # Find the most massive clusters
         masses = list(mass2[np.arange(Vd, dtype = int) == uf2])
         masses.sort(reverse = True)
-        results.append((L, p, masses[:numclusters]))
+        results.append([L, p, masses[:numclusters]])
 
     return results
 
-def biggest_clusters(d, Ls, ps, numclusters = 10, out = sys.stdout):
+def biggest_clusters(d, Ls, ps, numclusters = 10):
     assert(type(d) is int)
     assert(d >= 1)
     assert(type(numclusters) is int)
@@ -314,6 +338,15 @@ def biggest_clusters(d, Ls, ps, numclusters = 10, out = sys.stdout):
     else:
         raise ValueError("Need either Ls or ps to be a singleton, but Ls = {}, ps = {}".format(Ls, ps))
 
+    for r in result:
+        if len(r[2]) < numclusters:
+            r[2] = list(r[2]) + [0] * (numclusters - len(r[2]))
+
+    return result
+
+def display_biggest_clusters(d, Ls, ps, numclusters = 10, out = sys.stdout):
+    result = biggest_clusters(d, Ls, ps, numclusters)
+
     table = []
     table.append(['L', 'p'] + ['size' + str(i) for i in range(numclusters)])
     for r in result:
@@ -323,7 +356,7 @@ def biggest_clusters(d, Ls, ps, numclusters = 10, out = sys.stdout):
 
     out.write(prettyprint(table))
 
-def cluster_example(keyword, L, p):
+def percolation2d(keyword, L, p):
     cells, uf, mass = biggest_clusters_ps(2, L, [p], interrupt = True)
 
     def root(c):
@@ -374,6 +407,13 @@ def cluster_example(keyword, L, p):
     else:
         raise ValueError('Unrecognized keyword "{}"'.format(keyword))
 
+def display_percolation2d(keyword, L, p, out = sys.stdout):
+    grid = percolation2d(keyword, L, p)
+
+    table = [[str(grid[i, j]) for i in range(L)] for j in range(L)]
+
+    out.write(prettyprint(table))
+
 def main():
     args = sys.argv
     # Arguments:
@@ -394,15 +434,12 @@ def main():
             L = int(args[2])
             p = float(args[3])
 
-            grid = cluster_example(keyword, L, p)
-            table = [[str(grid[i, j]) for i in range(L)] for j in range(L)]
-
             if len(args) >= 5:
                 filename = args[4]
                 with open(filename, 'w') as f:
-                    f.write(prettyprint(table))
+                    display_percolation2d(keyword, L, p, f)
             else:
-                sys.stdout.write(prettyprint(table))
+                display_percolation2d(keyword, L, p)
         else:
             d = int(args[1])
             Ls = [int(L) for L in args[2].split(',')]
@@ -415,9 +452,9 @@ def main():
 
             if len(args) >= 5:
                 numclusters = int(args[4])
-                biggest_clusters(d, Ls, ps, numclusters)
+                display_biggest_clusters(d, Ls, ps, numclusters)
             else:
-                biggest_clusters(d, Ls, ps)
+                display_biggest_clusters(d, Ls, ps)
     else:
         print(usage)
 
