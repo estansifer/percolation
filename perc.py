@@ -26,7 +26,7 @@ import sys
 #   (The results will be returned in order of increasing L or p.)
 #
 # percolation2d(keyword, L, p)
-#   keyword: either "one", "masses", "biggest", or "whichcluster"
+#   keyword: either "ones", "masses", "biggest", or "whichcluster"
 #   L: integer (>= 2), the grid size
 #   p: float (>= 0, <= 1), the occupancy probability
 #   returns LxL grid of integers. Meaning of the grid depends on choice
