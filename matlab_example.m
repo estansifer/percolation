@@ -5,6 +5,7 @@ function matlab_example
 % Place perc.py in the same directory as your MATLAB code.
 %
 
+% Using R2016B? You may need to make a change, search for "R2016B" below.
 
 % Tells MATLAB to search for python files in the current directory:
 addpythonimport('');
@@ -98,6 +99,8 @@ function [L p clustersizes] = biggest_clusters(d, Ls, ps, numclusters)
     for i = 1:n
         row = py_result{i};
         L(1, i) = int32(row{1});
+        % In R2016B, you might need to replace the previous line with
+        %   L(1, i) = double(py.float(row{1}));
         p(1, i) = double(row{2});
         x = double(py.array.array('d', py.numpy.nditer(py.numpy.array(row{3}), pyargs('order', 'F'))));
         clustersizes(i, :) = x(:);
@@ -110,8 +113,9 @@ end
 function [result] = percolation2d(keyword, L, p)
     py_result = py.perc.percolation2d(keyword, int32(L), p);
     flat_result = double(py.array.array('d', py.numpy.nditer(py_result, pyargs('order', 'F'))));
-    result_shape = cell2mat(cell(py_result.shape));
-    result = reshape(flat_result, result_shape);
+    % result_shape = cell2mat(cell(py_result.shape));
+    % result = reshape(flat_result, result_shape);
+    result = reshape(flat_result, [L, L]);
 end
 
 function [] = addpythonimport(mypath)
