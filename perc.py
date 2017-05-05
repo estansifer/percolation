@@ -33,7 +33,7 @@ import sys
 #   of the keyword. See usage for more information.
 #
 
-suppress_warning = False
+suppress_warning = True
 
 usage=(
 """A program for finding sizes of clusters in a percolation process.
@@ -137,7 +137,7 @@ def prettyprint(data):
 def biggest_clusters_ps(d, L, ps, numclusters = 10, interrupt = False):
     V = L ** d
     if (d * V * max(ps) > 1e7) and not suppress_warning:
-        sys.stderror.write("A very large number {} of cells was chosen in the domain, this may take a long time.".format(V))
+        sys.stderr.write("A very large number {} of cells was chosen in the domain, this may take a long time.".format(V))
 
     Vd = V * d
 
@@ -218,7 +218,7 @@ def biggest_clusters_Ls(d, Ls, p, numclusters = 10):
     V = Lmax ** d
     Vd = V * d
     if (d * V * p > 1e7) and not suppress_warning:
-        sys.stderror.write("A very large number {} of cells was chosen in the domain, this may take a long time.".format(V))
+        sys.stderr.write("A very large number {} of cells was chosen in the domain, this may take a long time.".format(V))
 
     cells = np.zeros((V, 2 * d), dtype = int)
     for i in range(d):
