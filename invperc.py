@@ -50,9 +50,8 @@ usage=(
 Usage:
     python perc.py L
 
-The program simulates a three dimensional domain of size 2L x L x L
-with periodic boundary conditions. The inlet and outlet are chosen to
-be a distance of L apart.
+The program simulates a three dimensional domain of size L x L x L
+with periodic boundary conditions.
 """)
 
 def main():
