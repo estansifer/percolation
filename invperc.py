@@ -20,11 +20,15 @@ def invperc(L):
 
     adj = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
 
-    visited = np.zeros((2 * L, L, L), dtype = bool)
-    rs = npr.random((8 * L * L * L,))
-    i = 0
+    visited = np.zeros((L + 1, L, L), dtype = bool)
 
-    q = [(0, 0, 0, 0)]
+    rs = npr.random((6 * (L + 1) * L * L,))
+
+    i = 0
+    q = []
+    for y in range(L):
+        for z in range(L):
+            q.append((0, 0, y, z))
 
     while len(q) > 0:
         p, x, y, z = pop(q)
@@ -32,18 +36,18 @@ def invperc(L):
         if not visited[x, y, z]:
             visited[x, y, z] = True
 
-            if x == L and y == 0:
+            if x == L:
                 break
 
             for dx, dy, dz in adj:
-                x_ = (x + dx) % (2 * L)
+                x_ = x + dx
                 y_ = (y + dy) % L
                 z_ = (z + dz) % L
-                if not visited[x_, y_, z_]:
+                if x_ > 0 and not visited[x_, y_, z_]:
                     push(q, (rs[i], x_, y_, z_))
                     i += 1
 
-    return np.sum(visited)
+    return np.sum(visited[1:, :, :])
 
 usage=(
 """A program for simulating invasion percolation.
